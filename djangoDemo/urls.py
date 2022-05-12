@@ -21,6 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'^users/', include('users.urls')),
     url(r'^request/', include('users.urls')),
-    url(r'^', include('request_response.urls')),
-    url(r'^books$', include('mysql.urls'), name ='book'),
+    # url(r'^', include('request_response.urls')),
+    url(r'^', include('mysql.urls')),
 ]
