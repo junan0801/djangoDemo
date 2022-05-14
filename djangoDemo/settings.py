@@ -13,6 +13,8 @@ import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+import mysql.apps
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -38,7 +40,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users.apps.Test1Config',
+
+    'rest_framework',
     'mysql.apps.MysqlConfig'
+
 ]
 
 MIDDLEWARE = [
@@ -79,7 +84,7 @@ WSGI_APPLICATION = 'djangoDemo.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': '117.50.179.77',
+        'HOST': '117.50.182.130',
         'PORT': '13306',
         'USER': 'root',
         'PASSWORD': 'zja611612',

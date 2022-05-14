@@ -2,6 +2,9 @@ import json
 from mysql.models import BookInfo
 from django.http.response import HttpResponse, JsonResponse
 from django.views import View
+from rest_framework.viewsets import ModelViewSet
+
+from mysql.serializers import BookInfoSerializer
 
 
 class BookListView(View):
@@ -22,14 +25,14 @@ class BookListView(View):
         json_str = json_str_byte.decode()
         book_dict = json.loads(json_str)
         book = BookInfo(
-            btitle=book_dict['btitle'],
-            bpub_data=book_dict['bpub_data']
+        btitle=book_dict['btitle'],
+        bpub_data=book_dict['bpub_data']
         )
         book.save()
         json_dict = {
             'id': book.id,
             'btitle': book.btitle,
-            'book.bpub_data': book.bpub_data
+            'bpub_data': book.bpub_data
         }
         return JsonResponse(json_dict, status=201)
 
@@ -72,3 +75,8 @@ class BookDetailView(View):
             return HttpResponse({'message:': '待删除数据不存在'}, status=404)
         book.delete()
         return HttpResponse(status=204)
+
+
+class BookInfoView(ModelViewSet):
+    queryset = BookInfo.objects.all()
+    serializer_class = BookInfoSerializer
