@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class BookInfo(models.Model):
     btitle = models.CharField(max_length=20, verbose_name='名称')
     bpub_data = models.CharField(max_length=20, verbose_name='发布日期')

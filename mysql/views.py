@@ -1,82 +1,55 @@
-import json
-from mysql.models import BookInfo
-from django.http.response import HttpResponse, JsonResponse
-from django.views import View
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
 from rest_framework.viewsets import ModelViewSet
 
-from mysql.serializers import BookInfoSerializer
+from mysql.serializers import BookInfoModeSerializers
+from mysql.models import BookInfo
 
 
-class BookListView(View):
+class BookListAPIView(APIView):
+
     def get(self, request):
-        books = BookInfo.objects.all()
-        book_list = []
-        for book in books:
-            book_dict = {
-                'id': book.id,
-                'btitle': book.btitle,
-                'bpub_data': book.bpub_data
-            }
-            book_list.append(book_dict)
-        return JsonResponse(book_list, safe=False)
+        qs = BookInfo.objects.all()
+        serializer = BookInfoModeSerializers(instance=qs, many=True)
+        return Response(serializer.data)
 
     def post(self, request):
-        json_str_byte = request.body
-        json_str = json_str_byte.decode()
-        book_dict = json.loads(json_str)
-        book = BookInfo(
-        btitle=book_dict['btitle'],
-        bpub_data=book_dict['bpub_data']
-        )
-        book.save()
-        json_dict = {
-            'id': book.id,
-            'btitle': book.btitle,
-            'bpub_data': book.bpub_data
-        }
-        return JsonResponse(json_dict, status=201)
+        data = request.data
+        serializer = BookInfoModeSerializers(data=data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-class BookDetailView(View):
+class BookDetailAPIView(APIView):
     def get(self, request, pk):
         try:
             book = BookInfo.objects.get(id=pk)
         except BookInfo.DoesNotExist:
-            return HttpResponse({'message:': '查询数据不存在'}, status=404)
-        book_dir = {
-            'id': book.id,
-            'btitle': book.btitle,
-            'book.bpub_data': book.bpub_data
-        }
-        return JsonResponse(book_dir)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = BookInfoModeSerializers(instance=book)
+        return Response(serializer.data)
 
     def put(self, request, pk):
         try:
             book = BookInfo.objects.get(id=pk)
         except BookInfo.DoesNotExist:
-            return HttpResponse({'message:': '要修改的数据数据不存在'}, status=404)
-        json_str_byte = request.body
-        json_str = json_str_byte.decode()
-        book_dict = json.loads(json_str)
-        book.btitle = book_dict['btitle'],
-        book.bpub_data = book_dict['bpub_data']
-        book.save()
-        json_dict = {
-            'id': book.id,
-            'btitle': book.btitle,
-            'book.bpub_data': book.bpub_data
-        }
-        return JsonResponse(json_dict)
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        serializer = BookInfoModeSerializers(instance=book, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.validated_data)
+
 
     def delete(self, request, pk):
+        # q = BookInfo.objects.get(id=pk)
         try:
             book = BookInfo.objects.get(id=pk)
         except BookInfo.DoesNotExist:
-            return HttpResponse({'message:': '待删除数据不存在'}, status=404)
+            return Response(status=status.HTTP_404_NOT_FOUND)
         book.delete()
-        return HttpResponse(status=204)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-class BookInfoView(ModelViewSet):
-    queryset = BookInfo.objects.all()
-    serializer_class = BookInfoSerializer
